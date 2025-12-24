@@ -1,65 +1,179 @@
-import Image from "next/image";
+/**
+ * Home Page
+ *
+ * หน้าแรกของ application แสดง Dashboard/Overview
+ *
+ * TODO:
+ * - เพิ่มข้อมูล analytics (total usage, credits used, etc.)
+ * - แสดง recent activities
+ * - Quick actions (New Chat, Upload Image)
+ */
+
+import { MainLayout } from "@/components/layout/main-layout";
+import { Header } from "@/components/layout/header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MessageSquare, Video, BarChart3, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <MainLayout>
+      <Header
+        title="Dashboard"
+        description="ยินดีต้อนรับสู่ AI Tools Platform"
+        actions={
+          <Button>
+            เริ่มใช้งาน
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        }
+      />
+
+      <div className="p-6">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-2">สวัสดี! 👋</h2>
+          <p className="text-muted-foreground">
+            เริ่มต้นใช้งาน AI Tools ที่ออกแบบมาเพื่อคนทำงานไทย
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Quick Access Cards */}
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          <Link href="/chat">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <MessageSquare className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle>Chat / Content</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  สร้าง content marketing, ตอบคำถาม ด้วย AI ที่เข้าใจบริบทไทย
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/image-to-video">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Video className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle>Image to Video</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  แปลงรูปภาพเป็นวิดีโอสำหรับ Reels และ Social Media
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/analytics">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle>Analytics</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  ดูสถิติการใช้งาน และ performance ของคุณ
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
-      </main>
-    </div>
+
+        {/* Stats Section */}
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Total Chats</CardDescription>
+              <CardTitle className="text-3xl">0</CardTitle>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Videos Created</CardDescription>
+              <CardTitle className="text-3xl">0</CardTitle>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Chat Credits</CardDescription>
+              <CardTitle className="text-3xl">50</CardTitle>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Image Credits</CardDescription>
+              <CardTitle className="text-3xl">3</CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Getting Started Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>เริ่มต้นใช้งาน</CardTitle>
+            <CardDescription>
+              ขั้นตอนง่ายๆ เพื่อเริ่มใช้งาน AI Tools
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                  1
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">เลือก Tool ที่ต้องการใช้</p>
+                  <p className="text-sm text-muted-foreground">
+                    Chat, Image to Video, หรือ Analytics
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                  2
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">เริ่มสร้างงาน</p>
+                  <p className="text-sm text-muted-foreground">
+                    ใส่ input และให้ AI ช่วยสร้างสรรค์ผลงาน
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                  3
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">ดาวน์โหลดและนำไปใช้</p>
+                  <p className="text-sm text-muted-foreground">
+                    นำผลลัพธ์ไปใช้งานได้ทันที
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </MainLayout>
   );
 }
