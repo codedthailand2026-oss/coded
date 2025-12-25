@@ -10,7 +10,7 @@
 Frontend ได้สร้างหน้า Login และ Register เรียบร้อยแล้ว
 รองรับ **2 วิธีการ login**:
 - Email + Password (traditional)
-- Google OAuth (recommended)
+- **Google OAuth (recommended)** - อยู่ที่หน้า Login เท่านั้น (จัดการทั้ง login และ register อัตโนมัติ)
 
 ต้องการ API endpoints ดังนี้:
 
@@ -308,7 +308,8 @@ Authorization: Bearer <jwt-token>
 ### Overview
 
 Supabase มี Google OAuth integration พร้อมใช้งานแล้ว
-Frontend ได้เพิ่มปุ่ม "Login with Google" และ "Sign up with Google" เรียบร้อย
+Frontend ได้เพิ่มปุ่ม "Login with Google" ที่**หน้า Login เท่านั้น**
+ปุ่มเดียวจัดการทั้ง login และ register อัตโนมัติ (standard OAuth UX pattern)
 
 ### Setup Required (Backend)
 
@@ -477,12 +478,15 @@ if (error) {
 - [ ] ป้องกัน brute force (rate limiting)
 - [ ] Return ข้อมูล user + credits ครบถ้วน
 
-### Google OAuth
+### Google OAuth (Login Page Only)
 - [ ] Google OAuth เปิดใช้งานใน Supabase
+- [ ] ปุ่ม "Login with Google" อยู่ที่หน้า Login เท่านั้น (ไม่มีที่หน้า Register)
 - [ ] Login with Google redirect ถูกต้อง
 - [ ] Callback page ทำงานได้
-- [ ] Trigger สร้าง profile/subscription/credits อัตโนมัติ
+- [ ] Trigger สร้าง profile/subscription/credits อัตโนมัติ (สำหรับ user ใหม่)
 - [ ] ดึงข้อมูล name, email, avatar จาก Google ได้
+- [ ] User เก่า: login ตรงไปที่ dashboard
+- [ ] User ใหม่: สร้าง account + login ทันที
 
 ### Logout & Get User
 - [ ] Logout invalidate token
