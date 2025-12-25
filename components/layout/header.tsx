@@ -5,16 +5,14 @@
  *
  * Features:
  * - แสดง page title (รับจาก props)
- * - แสดง breadcrumbs (optional)
- * - Mobile responsive (จะเพิ่ม hamburger menu สำหรับ mobile ในอนาคต)
- *
- * TODO: เพิ่ม mobile menu toggle button
+ * - Mobile: แสดง hamburger menu button
+ * - Actions buttons (optional)
  */
 
 "use client";
 
 import { ReactNode } from "react";
-import { Separator } from "@/components/ui/separator";
+import { MobileSidebar } from "./mobile-sidebar";
 
 interface HeaderProps {
   /**
@@ -36,14 +34,19 @@ interface HeaderProps {
 
 export function Header({ title, description, actions }: HeaderProps) {
   return (
-    <div className="border-b bg-background">
-      <div className="flex h-16 items-center justify-between px-6">
-        {/* Left: Title + Description */}
-        <div className="flex flex-col">
-          <h1 className="text-xl font-semibold">{title}</h1>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
+    <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center justify-between px-4 lg:px-6">
+        {/* Left: Mobile Menu + Title */}
+        <div className="flex items-center gap-3">
+          <MobileSidebar />
+          <div className="flex flex-col">
+            <h1 className="text-lg font-semibold lg:text-xl">{title}</h1>
+            {description && (
+              <p className="hidden text-sm text-muted-foreground sm:block">
+                {description}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Right: Actions */}

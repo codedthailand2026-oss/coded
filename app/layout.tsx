@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 /**
  * Layout หลักของ Application
  *
- * ใช้ system fonts แทน Google Fonts เพื่อหลีกเลี่ยงปัญหา TLS
- * และลดเวลา loading (ไม่ต้อง fetch fonts จาก external source)
+ * Features:
+ * - ใช้ system fonts แทน Google Fonts เพื่อหลีกเลี่ยงปัญหา TLS
+ * - ThemeProvider สำหรับจัดการ theme colors (dark, blue, purple, green)
+ * - suppressHydrationWarning เพื่อป้องกัน warning จาก theme class
  */
 
 export const metadata: Metadata = {
@@ -21,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="th" suppressHydrationWarning>
       <body className="antialiased">
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -10,6 +10,10 @@
  * - แสดง credits ที่เหลือ
  */
 
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 import { MainLayout } from "@/components/layout/main-layout";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
