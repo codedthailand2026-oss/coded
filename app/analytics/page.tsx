@@ -10,6 +10,10 @@
  * - Export report
  */
 
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 import { MainLayout } from "@/components/layout/main-layout";
 import { Header } from "@/components/layout/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
