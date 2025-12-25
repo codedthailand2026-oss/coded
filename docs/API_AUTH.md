@@ -8,12 +8,17 @@
 ## 📋 Overview
 
 Frontend ได้สร้างหน้า Login และ Register เรียบร้อยแล้ว
+รองรับ **2 วิธีการ login**:
+- Email + Password (traditional)
+- Google OAuth (recommended)
+
 ต้องการ API endpoints ดังนี้:
 
 1. **POST /api/auth/register** - สมัครสมาชิก
 2. **POST /api/auth/login** - เข้าสู่ระบบ
-3. **POST /api/auth/logout** - ออกจากระบบ
-4. **GET /api/auth/me** - ดึงข้อมูล user ปัจจุบัน
+3. **🆕 Google OAuth** - Login/Register ด้วย Google
+4. **POST /api/auth/logout** - ออกจากระบบ
+5. **GET /api/auth/me** - ดึงข้อมูล user ปัจจุบัน
 
 ---
 
@@ -298,6 +303,133 @@ Authorization: Bearer <jwt-token>
 
 ---
 
+## 🔗 3. Google OAuth (แนะนำ!)
+
+### Overview
+
+Supabase มี Google OAuth integration พร้อมใช้งานแล้ว
+Frontend ได้เพิ่มปุ่ม "Login with Google" และ "Sign up with Google" เรียบร้อย
+
+### Setup Required (Backend)
+
+**1. เปิดใช้งาน Google OAuth ใน Supabase Dashboard:**
+```
+Settings → Authentication → Providers → Google
+- Enable Google provider
+- ใส่ Google OAuth Client ID
+- ใส่ Google OAuth Client Secret
+```
+
+**2. Setup Redirect URLs:**
+```
+Authorized redirect URIs:
+- https://[PROJECT-ID].supabase.co/auth/v1/callback
+- http://localhost:3000/auth/callback (for dev)
+```
+
+**3. Google Cloud Console Setup:**
+- สร้าง OAuth 2.0 Client ID
+- Authorized JavaScript origins: `http://localhost:3000`, `https://yourdomain.com`
+- Authorized redirect URIs: ตาม Supabase
+
+### Flow (Automatic by Supabase)
+
+**Frontend Code:**
+```typescript
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
+const supabase = createClientComponentClient()
+
+// Login/Register with Google
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: `${window.location.origin}/auth/callback`
+  }
+})
+```
+
+**Auth Flow:**
+1. User คลิกปุ่ม "Login with Google"
+2. Frontend เรียก `supabase.auth.signInWithOAuth({ provider: 'google' })`
+3. Redirect ไป Google login page
+4. User login และอนุญาต
+5. Google redirect กลับมา Supabase callback
+6. **Supabase trigger `handle_new_user()` ทำงานอัตโนมัติ:**
+   - สร้าง profile
+   - สร้าง subscription (Free plan)
+   - สร้าง credits (50 chat, 3 image)
+7. Redirect ไป `/auth/callback` (frontend)
+8. Frontend ดึง session และ redirect ไป dashboard
+
+### สิ่งที่ Backend ต้องทำ
+
+#### ✅ Already Handled by Supabase Trigger
+- สร้าง user profile
+- สร้าง subscription
+- สร้าง credits
+
+Trigger `handle_new_user()` ที่มีอยู่แล้วจะทำงานทั้ง email/password และ OAuth!
+
+#### ❗ต้องทำเพิ่ม (Optional)
+
+**สร้าง Auth Callback Page:**
+
+File: `app/auth/callback/route.ts`
+```typescript
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
+
+  if (code) {
+    const supabase = createRouteHandlerClient({ cookies })
+    await supabase.auth.exchangeCodeForSession(code)
+  }
+
+  // Redirect to dashboard
+  return NextResponse.redirect(new URL('/', requestUrl.origin))
+}
+```
+
+### Data Mapping (Google → Supabase)
+
+```
+Google Profile → Supabase User:
+- email         → auth.users.email
+- name          → profiles.name
+- picture       → profiles.avatar
+- sub (Google ID) → auth.users.raw_user_meta_data.sub
+```
+
+### Advantages
+
+✅ **ไม่ต้องจัดการ password**
+✅ **Auto-create profile/subscription/credits** (by trigger)
+✅ **Secure** (OAuth 2.0 standard)
+✅ **Fast** (one-click login)
+✅ **Better UX** (no need to remember password)
+
+### Error Handling
+
+**OAuth Errors:**
+```typescript
+if (error) {
+  // Handle OAuth errors
+  console.error('OAuth error:', error.message)
+
+  // Common errors:
+  // - User denied permission
+  // - Invalid redirect URI
+  // - OAuth client not configured
+}
+```
+
+---
+
 ## 📊 Database Schema Reference
 
 ### ตรวจสอบ schema ที่ต้องใช้:
@@ -334,16 +466,23 @@ Authorization: Bearer <jwt-token>
 
 ## 🧪 Testing Checklist
 
-### Register
+### Register (Email/Password)
 - [ ] สมัครสำเร็จด้วยข้อมูลถูกต้อง
 - [ ] ป้องกันอีเมลซ้ำ
 - [ ] Validate password strength
 - [ ] สร้าง profile, subscription, credits อัตโนมัติ
 
-### Login
+### Login (Email/Password)
 - [ ] Login สำเร็จด้วย email + password ถูกต้อง
 - [ ] ป้องกัน brute force (rate limiting)
 - [ ] Return ข้อมูล user + credits ครบถ้วน
+
+### Google OAuth
+- [ ] Google OAuth เปิดใช้งานใน Supabase
+- [ ] Login with Google redirect ถูกต้อง
+- [ ] Callback page ทำงานได้
+- [ ] Trigger สร้าง profile/subscription/credits อัตโนมัติ
+- [ ] ดึงข้อมูล name, email, avatar จาก Google ได้
 
 ### Logout & Get User
 - [ ] Logout invalidate token
