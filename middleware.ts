@@ -27,6 +27,7 @@ const protectedRoutes = ["/chat", "/image-to-video", "/analytics", "/settings"];
 const authRoutes = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
+  return NextResponse.next();
   let response = NextResponse.next({
     request: {
       headers: request.headers,
