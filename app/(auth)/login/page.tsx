@@ -22,7 +22,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -40,17 +40,15 @@ import {
 import { LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+// แยก Component ที่ใช้ useSearchParams
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ดู error จาก URL (ถ้ามี - เช่น จาก OAuth callback)
   const urlError = searchParams.get("error");
-
-  // ดู redirect path (ถ้ามี - เพื่อ redirect กลับหลัง login)
   const redirectPath = searchParams.get("redirect") || "/";
 
   const [formData, setFormData] = useState({
@@ -58,11 +56,6 @@ export default function LoginPage() {
     password: "",
   });
 
-  /**
-   * Handle Google OAuth sign in
-   *
-   * จะ redirect ไป Google แล้วกลับมาที่ /auth/callback
-   */
   const handleGoogleSignIn = async () => {
     setError("");
     setGoogleLoading(true);
@@ -73,9 +66,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // หลัง login สำเร็จ redirect มาที่ /auth/callback
           redirectTo: `${window.location.origin}/auth/callback?next=${redirectPath}`,
-          // ขอข้อมูลอะไรจาก Google บ้าง
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -86,10 +77,6 @@ export default function LoginPage() {
       if (error) {
         throw error;
       }
-
-      // ถ้าสำเร็จ จะ redirect ไป Google ทันที
-      // Code จะไม่มาถึงตรงนี้
-
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google";
       setError(errorMessage);
@@ -97,23 +84,18 @@ export default function LoginPage() {
     }
   };
 
-  /**
-   * Handle Email/Password sign in
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // Basic validation
       if (!formData.email || !formData.password) {
         setError("กรุณากรอกข้อมูลให้ครบถ้วน");
         setLoading(false);
         return;
       }
 
-      // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         setError("รูปแบบอีเมลไม่ถูกต้อง");
@@ -129,7 +111,6 @@ export default function LoginPage() {
       });
 
       if (error) {
-        // แปลง error message เป็นภาษาไทย
         if (error.message === "Invalid login credentials") {
           setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
         } else if (error.message === "Email not confirmed") {
@@ -141,10 +122,8 @@ export default function LoginPage() {
         return;
       }
 
-      // สำเร็จ! Redirect ไปหน้าที่กำหนด
       router.push(redirectPath);
       router.refresh();
-
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
       setError(errorMessage);
@@ -167,7 +146,6 @@ export default function LoginPage() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {/* แสดง Error จาก URL หรือ State */}
           {(error || urlError) && (
             <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {error || decodeURIComponent(urlError || "")}
@@ -277,5 +255,33 @@ export default function LoginPage() {
         </CardFooter>
       </form>
     </Card>
+  );
+}
+
+// Loading component
+function LoginLoading() {
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1">
+        <div className="flex items-center justify-center mb-2">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <LogIn className="h-6 w-6 text-primary" />
+          </div>
+        </div>
+        <CardTitle className="text-2xl text-center">เข้าสู่ระบบ</CardTitle>
+        <CardDescription className="text-center">
+          กำลังโหลด...
+        </CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+// Main Page Component - ครอบด้วย Suspense
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginForm />
+    </Suspense>
   );
 }
