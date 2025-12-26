@@ -27,68 +27,70 @@ const protectedRoutes = ["/chat", "/image-to-video", "/analytics", "/settings"];
 const authRoutes = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
-  return NextResponse.next();
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  // สร้าง Supabase client สำหรับ middleware
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  // เช็คว่ามี environment variables หรือไม่
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // ถ้าไม่มี ให้ผ่านไปเลย (ป้องกัน error)
+    return response;
+  }
+
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet) {
-          // Update cookies ใน request
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          // Update cookies ใน response
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const path = request.nextUrl.pathname;
+
+    // ถ้าเข้าหน้าที่ต้อง login แต่ยังไม่ login
+    if (protectedRoutes.some((route) => path.startsWith(route)) && !user) {
+      const redirectUrl = new URL("/login", request.url);
+      redirectUrl.searchParams.set("redirect", path);
+      return NextResponse.redirect(redirectUrl);
     }
-  );
 
-  // ดึง user ปัจจุบัน (จะ refresh session อัตโนมัติถ้าหมดอายุ)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    // ถ้า login แล้วแต่พยายามเข้าหน้า login/register
+    if (authRoutes.some((route) => path.startsWith(route)) && user) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
 
-  const path = request.nextUrl.pathname;
-
-  // ถ้าเข้าหน้าที่ต้อง login แต่ยังไม่ login
-  if (protectedRoutes.some((route) => path.startsWith(route)) && !user) {
-    const redirectUrl = new URL("/login", request.url);
-    // เก็บ path เดิมไว้ เพื่อ redirect กลับมาหลัง login
-    redirectUrl.searchParams.set("redirect", path);
-    return NextResponse.redirect(redirectUrl);
+    return response;
+  } catch (error) {
+    // ถ้ามี error ให้ผ่านไปเลย (ป้องกันหน้าค้าง)
+    console.error("Middleware error:", error);
+    return response;
   }
-
-  // ถ้า login แล้วแต่พยายามเข้าหน้า login/register
-  if (authRoutes.some((route) => path.startsWith(route)) && user) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  return response;
 }
 
-// บอกว่า middleware รันกับ path ไหนบ้าง
 export const config = {
   matcher: [
-    // รันกับทุก path ยกเว้น static files
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
