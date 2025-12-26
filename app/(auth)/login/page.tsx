@@ -1,42 +1,57 @@
 /**
  * Login Page
  *
- * หน้าเข้าสู่ระบบ
+ * หน้าเข้าสู่ระบบ - เชื่อมต่อ Supabase Auth แล้ว
  *
  * Features:
- * - Email + Password validation
+ * - Email + Password login
  * - Google OAuth sign in
  * - Error handling
  * - Loading state
- * - Link ไป Register page
+ * - Redirect หลัง login
  *
- * TODO: เชื่อมต่อ Supabase Auth
- *
- * Supabase OAuth Flow:
- * import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
- * const supabase = createClientComponentClient()
- * await supabase.auth.signInWithOAuth({ provider: 'google' })
+ * Flow Google OAuth:
+ * 1. User กดปุ่ม "เข้าสู่ระบบด้วย Google"
+ * 2. Redirect ไป Google login
+ * 3. Google redirect กลับมาที่ /auth/callback
+ * 4. /auth/callback แลก code เป็น session
+ * 5. Redirect ไปหน้า dashboard
  */
 
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { LogIn } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ดู error จาก URL (ถ้ามี - เช่น จาก OAuth callback)
+  const urlError = searchParams.get("error");
+
+  // ดู redirect path (ถ้ามี - เพื่อ redirect กลับหลัง login)
+  const redirectPath = searchParams.get("redirect") || "/";
 
   const [formData, setFormData] = useState({
     email: "",
@@ -46,51 +61,44 @@ export default function LoginPage() {
   /**
    * Handle Google OAuth sign in
    *
-   * TODO: เชื่อมต่อ Supabase Auth
-   * const supabase = createClientComponentClient()
-   * await supabase.auth.signInWithOAuth({
-   *   provider: 'google',
-   *   options: {
-   *     redirectTo: `${window.location.origin}/auth/callback`
-   *   }
-   * })
+   * จะ redirect ไป Google แล้วกลับมาที่ /auth/callback
    */
   const handleGoogleSignIn = async () => {
     setError("");
     setGoogleLoading(true);
 
     try {
-      // TODO: Implement Supabase Google OAuth
-      // const { data, error } = await supabase.auth.signInWithOAuth({
-      //   provider: 'google',
-      //   options: {
-      //     redirectTo: `${window.location.origin}/auth/callback`
-      //   }
-      // });
+      const supabase = createClient();
 
-      // if (error) throw error;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          // หลัง login สำเร็จ redirect มาที่ /auth/callback
+          redirectTo: `${window.location.origin}/auth/callback?next=${redirectPath}`,
+          // ขอข้อมูลอะไรจาก Google บ้าง
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
 
-      // Mock delay for demo
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (error) {
+        throw error;
+      }
 
-      console.log("Google sign in clicked - waiting for backend implementation");
-      setError("Google sign in จะพร้อมใช้งานเมื่อ Supabase OAuth ถูก setup แล้ว");
-      setGoogleLoading(false);
+      // ถ้าสำเร็จ จะ redirect ไป Google ทันที
+      // Code จะไม่มาถึงตรงนี้
 
-    } catch (err) {
-      setError("เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google";
+      setError(errorMessage);
       setGoogleLoading(false);
     }
   };
 
   /**
-   * Handle form submission
-   *
-   * Flow:
-   * 1. Validate form data
-   * 2. Call login API (TODO: implement)
-   * 3. Save token to localStorage
-   * 4. Redirect to dashboard
+   * Handle Email/Password sign in
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,25 +121,33 @@ export default function LoginPage() {
         return;
       }
 
-      // TODO: Call backend API
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      // const data = await response.json();
+      const supabase = createClient();
 
-      // Mock success (for demo)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // TODO: Save token
-      // localStorage.setItem('token', data.token);
+      if (error) {
+        // แปลง error message เป็นภาษาไทย
+        if (error.message === "Invalid login credentials") {
+          setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+        } else if (error.message === "Email not confirmed") {
+          setError("กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ");
+        } else {
+          setError(error.message);
+        }
+        setLoading(false);
+        return;
+      }
 
-      // Redirect to dashboard
-      router.push("/");
+      // สำเร็จ! Redirect ไปหน้าที่กำหนด
+      router.push(redirectPath);
+      router.refresh();
 
-    } catch (err) {
-      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -151,9 +167,10 @@ export default function LoginPage() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
+          {/* แสดง Error จาก URL หรือ State */}
+          {(error || urlError) && (
             <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
+              {error || decodeURIComponent(urlError || "")}
             </div>
           )}
 
@@ -164,8 +181,10 @@ export default function LoginPage() {
               type="email"
               placeholder="your@email.com"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              disabled={loading}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              disabled={loading || googleLoading}
               required
             />
           </div>
@@ -185,8 +204,10 @@ export default function LoginPage() {
               type="password"
               placeholder="••••••••"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              disabled={loading}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              disabled={loading || googleLoading}
               required
             />
           </div>
@@ -223,19 +244,19 @@ export default function LoginPage() {
               <>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
-                    fill="currentColor"
+                    fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   />
                   <path
-                    fill="currentColor"
+                    fill="#34A853"
                     d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
                   />
                   <path
-                    fill="currentColor"
+                    fill="#FBBC05"
                     d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
                   />
                   <path
-                    fill="currentColor"
+                    fill="#EA4335"
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>

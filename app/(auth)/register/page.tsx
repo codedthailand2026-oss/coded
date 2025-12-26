@@ -1,7 +1,7 @@
 /**
  * Register Page
  *
- * หน้าสมัครสมาชิก
+ * หน้าสมัครสมาชิก - เชื่อมต่อ Supabase Auth แล้ว
  *
  * Features:
  * - Full name, Email, Password validation
@@ -13,8 +13,6 @@
  * Note: Google OAuth อยู่ที่หน้า Login เท่านั้น
  * เพราะ OAuth จะจัดการทั้ง login และ register อัตโนมัติ
  *
- * TODO: เชื่อมต่อ Supabase Auth
- *
  * Flow หลัง Register (Auto by Supabase Trigger):
  * 1. สร้าง user profile
  * 2. สร้าง subscription (Free plan)
@@ -23,7 +21,7 @@
 
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -31,13 +29,22 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { UserPlus } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -74,8 +81,8 @@ export default function RegisterPage() {
    * 1. Validate all fields
    * 2. Check password strength
    * 3. Check password confirmation
-   * 4. Call register API (TODO: implement)
-   * 5. Auto login or redirect to login page
+   * 4. Call Supabase signUp
+   * 5. Show success message หรือ redirect
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +91,12 @@ export default function RegisterPage() {
 
     try {
       // Validation
-      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      if (
+        !formData.name ||
+        !formData.email ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
         setError("กรุณากรอกข้อมูลให้ครบถ้วน");
         setLoading(false);
         return;
@@ -111,32 +123,96 @@ export default function RegisterPage() {
         return;
       }
 
-      // TODO: Call backend API
-      // const response = await fetch('/api/auth/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     email: formData.email,
-      //     password: formData.password
-      //   })
-      // });
-      // const data = await response.json();
+      const supabase = createClient();
 
-      // Mock success (for demo)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          // ส่งชื่อไปเก็บใน user metadata
+          data: {
+            display_name: formData.name,
+          },
+          // หลัง verify email redirect มาที่ไหน
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-      // TODO: Save token (if auto login)
-      // localStorage.setItem('token', data.token);
+      if (error) {
+        // แปลง error message เป็นภาษาไทย
+        if (error.message === "User already registered") {
+          setError("อีเมลนี้ถูกใช้งานแล้ว");
+        } else {
+          setError(error.message);
+        }
+        setLoading(false);
+        return;
+      }
 
-      // Redirect to dashboard or login
-      router.push("/login");
-
-    } catch (err) {
-      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      // เช็คว่าต้อง verify email หรือไม่
+      if (data.user && !data.session) {
+        // ต้อง verify email ก่อน
+        setSuccess(true);
+        setLoading(false);
+      } else {
+        // Auto confirm enabled - login สำเร็จเลย
+        router.push("/");
+        router.refresh();
+      }
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
+      setError(errorMessage);
       setLoading(false);
     }
   };
+
+  // แสดงหน้า success ถ้าสมัครสำเร็จแต่ต้อง verify email
+  if (success) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+              <svg
+                className="h-6 w-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center">
+            สมัครสมาชิกสำเร็จ!
+          </CardTitle>
+          <CardDescription className="text-center">
+            กรุณาตรวจสอบอีเมลของคุณเพื่อยืนยันบัญชี
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center text-sm text-muted-foreground">
+          <p>
+            เราได้ส่งลิงก์ยืนยันไปที่{" "}
+            <span className="font-medium">{formData.email}</span>
+          </p>
+          <p className="mt-2">คลิกลิงก์ในอีเมลเพื่อเริ่มใช้งาน</p>
+        </CardContent>
+        <CardFooter className="justify-center">
+          <Link href="/login">
+            <Button variant="outline">กลับไปหน้าเข้าสู่ระบบ</Button>
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md">
