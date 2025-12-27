@@ -241,24 +241,17 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
 
         <Separator className="my-4" />
 
-        {/* Credits Display - เฉพาะ Graphic Credits ตามที่ user ต้องการ */}
+        {/* Credits Display - เฉพาะ Graphic Credits ONLY */}
         <div className="space-y-2 rounded-lg bg-muted p-3">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Coins className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+            <Coins className="h-3 w-3" />
             <span>{t('credits.graphic')}</span>
           </div>
-          <div className="space-y-1 text-xs text-muted-foreground">
-            <div className="flex justify-between">
-              <span className="font-medium text-foreground text-2xl">
-                {loading ? "..." : user.graphicCredits}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {t('credits.remaining')}
-              </span>
-            </div>
+          <div className="text-2xl font-bold">
+            {loading ? "..." : user.graphicCredits}
           </div>
-          <Button variant="outline" size="sm" className="w-full mt-2">
-            อัพเกรด Plan
+          <Button variant="outline" size="sm" className="w-full text-xs">
+            อัพเกรด
           </Button>
         </div>
 

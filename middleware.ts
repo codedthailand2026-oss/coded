@@ -26,7 +26,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 // หน้าที่ต้อง login ก่อนถึงจะเข้าได้
-const protectedRoutes = ["/chat", "/image-to-video", "/analytics", "/settings"];
+const protectedRoutes = ["/app"];
 
 // หน้าสำหรับคนที่ยังไม่ login (ถ้า login แล้วไม่ต้องเข้า)
 const authRoutes = ["/login", "/register"];
