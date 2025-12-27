@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n/context';
 import { useTheme } from '@/components/theme-provider';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import type { FeatureTab } from '@/app/(app)/page';
+import type { FeatureTab } from '@/components/app/AppPageClient';
 
 interface AppSidebarProps {
   activeFeature: FeatureTab;
