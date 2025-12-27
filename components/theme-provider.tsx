@@ -31,14 +31,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
-  // Load theme จาก localStorage เมื่อ component mount
+  // Set mounted state first
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Load theme จาก localStorage เมื่อ component mount
+  useEffect(() => {
+    if (!mounted) return;
+
     const savedTheme = localStorage.getItem("coded-theme") as Theme;
     if (savedTheme && ["dark", "light"].includes(savedTheme)) {
       setTheme(savedTheme);
     }
-  }, []);
+  }, [mounted]);
 
   // อัพเดท html class และ localStorage เมื่อ theme เปลี่ยน
   useEffect(() => {
@@ -53,7 +59,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.add(theme);
 
     // บันทึกลง localStorage
-    localStorage.setItem("coded-theme", theme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("coded-theme", theme);
+    }
   }, [theme, mounted]);
 
   // ป้องกัน hydration mismatch
