@@ -20,12 +20,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   MessageSquare,
+  Image as ImageIcon,
   Video,
-  BarChart3,
+  Mic,
   Settings,
   LogOut,
   Coins,
   Palette,
+  Globe,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -42,26 +44,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTranslation } from "@/lib/i18n/context";
 
-const menuItems = [
+const getMenuItems = (t: (key: string) => string) => [
   {
     icon: MessageSquare,
-    label: "Chat / Content",
+    label: t('nav.chat'),
     href: "/chat",
   },
   {
-    icon: Video,
-    label: "Image to Video",
-    href: "/image-to-video",
+    icon: ImageIcon,
+    label: t('nav.image'),
+    href: "/image",
   },
   {
-    icon: BarChart3,
-    label: "Analytics",
-    href: "/analytics",
+    icon: Video,
+    label: t('nav.video'),
+    href: "/video",
+  },
+  {
+    icon: Mic,
+    label: t('nav.audio'),
+    href: "/audio",
   },
   {
     icon: Settings,
-    label: "Settings",
+    label: t('nav.settings'),
     href: "/settings",
   },
 ];
@@ -78,6 +87,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const supabase = createClient();
+  const { t } = useTranslation();
 
   // User data state
   const [user, setUser] = useState({
@@ -85,10 +95,12 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
     email: "",
     avatar: "",
     chatCredits: 0,
-    imageCredits: 0,
+    graphicCredits: 0,
     plan: "Free",
   });
   const [loading, setLoading] = useState(true);
+
+  const menuItems = getMenuItems(t);
 
   // ป้องกัน hydration mismatch สำหรับ ThemeSwitcher
   useEffect(() => {
@@ -136,7 +148,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             email: authUser.email || '',
             avatar: authUser.user_metadata?.avatar_url || '',
             chatCredits: 0,
-            imageCredits: 0,
+            graphicCredits: 0,
             plan: 'Free',
           });
         } else {
@@ -146,7 +158,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             email: profile.email,
             avatar: profile.avatar_url || '',
             chatCredits: profile.credits?.chat_credits || 0,
-            imageCredits: profile.credits?.image_credits || 0,
+            graphicCredits: profile.credits?.graphic_credits || 0,
             plan: profile.subscriptions?.plan?.name || 'Free',
           });
         }
@@ -223,23 +235,19 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
 
         <Separator className="my-4" />
 
-        {/* Credits Display */}
+        {/* Credits Display - เฉพาะ Graphic Credits ตามที่ user ต้องการ */}
         <div className="space-y-2 rounded-lg bg-muted p-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Coins className="h-4 w-4" />
-            <span>Credits</span>
+            <span>{t('credits.graphic')}</span>
           </div>
           <div className="space-y-1 text-xs text-muted-foreground">
             <div className="flex justify-between">
-              <span>Chat:</span>
-              <span className="font-medium text-foreground">
-                {loading ? "..." : user.chatCredits}
+              <span className="font-medium text-foreground text-2xl">
+                {loading ? "..." : user.graphicCredits}
               </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Image:</span>
-              <span className="font-medium text-foreground">
-                {loading ? "..." : user.imageCredits}
+              <span className="text-xs text-muted-foreground">
+                {t('credits.remaining')}
               </span>
             </div>
           </div>
@@ -247,6 +255,21 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             อัพเกรด Plan
           </Button>
         </div>
+
+        <Separator className="my-4" />
+
+        {/* Language Switcher */}
+        {mounted && (
+          <div className="space-y-2 rounded-lg bg-muted p-3">
+            <div className="flex items-center gap-2 text-sm font-medium mb-2">
+              <Globe className="h-4 w-4" />
+              <span>Language</span>
+            </div>
+            <div className="flex justify-center">
+              <LanguageSwitcher />
+            </div>
+          </div>
+        )}
 
         <Separator className="my-4" />
 
@@ -296,12 +319,12 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onNavigate}>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <span>{t('nav.settings')}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
+              <span>{t('nav.logout')}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/lib/i18n/context";
 
 /**
  * Layout หลักของ Application
@@ -8,6 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
  * Features:
  * - ใช้ system fonts แทน Google Fonts เพื่อหลีกเลี่ยงปัญหา TLS
  * - ThemeProvider สำหรับจัดการ theme colors (dark, blue, purple, green)
+ * - I18nProvider สำหรับ multi-language support (EN/TH)
  * - suppressHydrationWarning เพื่อป้องกัน warning จาก theme class
  */
 
@@ -25,7 +27,9 @@ export default function RootLayout({
     <html lang="th" suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider>
-          {children}
+          <I18nProvider>
+            {children}
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>
