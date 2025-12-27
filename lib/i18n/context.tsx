@@ -36,19 +36,29 @@ const translations = {
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('th'); // default Thai
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Load locale from localStorage on mount
   useEffect(() => {
+    if (!mounted) return;
+
     const savedLocale = localStorage.getItem('locale') as Locale | null;
     if (savedLocale && (savedLocale === 'en' || savedLocale === 'th')) {
       setLocaleState(savedLocale);
     }
-  }, []);
+  }, [mounted]);
 
   // Save locale to localStorage when changed
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem('locale', newLocale);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('locale', newLocale);
+    }
   };
 
   // Translation function
