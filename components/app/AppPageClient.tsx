@@ -1,16 +1,8 @@
 /**
- * Main App Page - SPA Style (Freepik-like)
+ * App Page Client Component
  *
- * ทุก features อยู่ในหน้าเดียว:
- * - Sidebar ซ้าย (พับเก็บได้)
- * - Content area ขวา
- * - Tab-based navigation (ไม่มีการเปลี่ยนหน้า)
- *
- * Features:
- * - AI Chat
- * - Image Generator
- * - Video Generator
- * - Audio Generator
+ * Client component สำหรับหน้า /app
+ * แยกออกมาเพื่อให้ page.tsx เป็น server component
  */
 
 'use client';
@@ -24,7 +16,7 @@ import { AudioFeature } from '@/components/features/AudioFeature';
 
 export type FeatureTab = 'chat' | 'image' | 'video' | 'audio';
 
-export default function AppPage() {
+export function AppPageClient() {
   const [activeFeature, setActiveFeature] = useState<FeatureTab>('chat');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
