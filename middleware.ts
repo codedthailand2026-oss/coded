@@ -5,6 +5,7 @@
  * 1. Refresh session ถ้าใกล้หมดอายุ
  * 2. ป้องกันหน้าที่ต้อง login (Protected Routes)
  * 3. Redirect user ที่ login แล้วออกจากหน้า login/register
+ * 4. Redirect user ที่ยังไม่ทำ onboarding ไปหน้า /onboarding
  *
  * Protected Routes:
  * - /chat
@@ -15,6 +16,10 @@
  * Auth Routes (สำหรับคนที่ยังไม่ login):
  * - /login
  * - /register
+ *
+ * Public Routes (ไม่ต้อง login):
+ * - /onboarding
+ * - /api/onboarding
  */
 
 import { NextResponse, type NextRequest } from "next/server";
@@ -79,6 +84,26 @@ export async function middleware(request: NextRequest) {
     // ถ้า login แล้วแต่พยายามเข้าหน้า login/register
     if (authRoutes.some((route) => path.startsWith(route)) && user) {
       return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    // ถ้า login แล้วแต่ยังไม่ทำ onboarding
+    // (ยกเว้นหน้า onboarding, api, login, register)
+    if (user &&
+        path !== "/onboarding" &&
+        !path.startsWith("/api/onboarding") &&
+        !authRoutes.some((route) => path.startsWith(route))) {
+
+      // เช็คว่าทำ onboarding เสร็จหรือยัง
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", user.id)
+        .single();
+
+      // ถ้ายังไม่เสร็จ → redirect ไป /onboarding
+      if (profile && !profile.onboarding_completed) {
+        return NextResponse.redirect(new URL("/onboarding", request.url));
+      }
     }
 
     return response;
