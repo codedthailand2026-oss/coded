@@ -1,0 +1,125 @@
+{
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "home": "Home",
+    "chat": "AI Chat",
+    "graphic": "Graphic",
+    "image": "Image",
+    "video": "Video",
+    "audio": "Audio",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "phone": {
+      "title": "Your Phone Number",
+      "description": "We'll use this to contact you if needed",
+      "placeholder": "812345678",
+      "fullNumber": "Full number:",
+      "helpText": "We'll use this to send you important updates about your account",
+      "error": {
+        "invalid": "Please enter a valid phone number (at least 8 digits)",
+        "digitsOnly": "Phone number should contain only digits"
+      }
+    },
+    "company": {
+      "title": "Company Information",
+      "description": "Tell us about your organization",
+      "placeholder": "Your Company or Organization",
+      "helpText": "This helps us personalize your experience",
+      "error": {
+        "tooShort": "Please enter your company name (at least 2 characters)"
+      }
+    },
+    "jobTitle": {
+      "title": "Your Role",
+      "description": "What do you do?",
+      "helpText": "Select the role that best describes what you do",
+      "roles": {
+        "marketing": "Marketing",
+        "project_manager": "Project Manager",
+        "business_owner": "Business Owner",
+        "content_creator": "Content Creator",
+        "graphic_designer": "Graphic Designer",
+        "software_developer": "Software Developer",
+        "data_analyst": "Data Analyst",
+        "sales": "Sales",
+        "hr": "Human Resources",
+        "other": "Other"
+      }
+    },
+    "industry": {
+      "title": "Your Industry",
+      "description": "What industry are you in?",
+      "helpText": "Select your industry to get personalized AI recommendations",
+      "complete": "Complete Setup",
+      "industries": {
+        "technology": "Technology",
+        "retail": "Retail & E-commerce",
+        "finance": "Finance & Banking",
+        "education": "Education",
+        "healthcare": "Healthcare",
+        "manufacturing": "Manufacturing",
+        "real_estate": "Real Estate",
+        "hospitality": "Hospitality & Tourism",
+        "media": "Media & Entertainment",
+        "consulting": "Consulting",
+        "other": "Other"
+      }
+    },
+    "saving": "Saving your information..."
+  },
+  "chat": {
+    "title": "AI Chat",
+    "newProject": "New Project",
+    "projects": "Projects",
+    "systemPrompt": {
+      "general": "General",
+      "marketing": "Marketing",
+      "analysis": "Analysis"
+    },
+    "placeholder": "Type your message...",
+    "send": "Send",
+    "attachFile": "Attach File",
+    "attachImage": "Attach Image"
+  },
+  "graphic": {
+    "title": "Graphic Generator",
+    "image": "Image",
+    "video": "Video",
+    "audio": "Audio",
+    "model": "Model",
+    "auto": "Auto",
+    "references": "References",
+    "style": "Style",
+    "character": "Character",
+    "upload": "Upload",
+    "prompt": "Describe your {{type}}",
+    "generate": "Generate",
+    "upgrade": "Upgrade for better quality, speed, and full control"
+  },
+  "credits": {
+    "chat": "Chat Credits",
+    "graphic": "Graphic Credits",
+    "remaining": "remaining"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
+}
