@@ -10,10 +10,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, MessageSquare, Sparkles, BarChart3 } from 'lucide-react';
+import { Plus, MessageSquare, Sparkles, BarChart3, Clock } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,25 @@ const PROMPT_ICONS = {
   marketing: Sparkles,
   analysis: BarChart3,
 };
+
+// Helper: คำนวณ relative time
+function getRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return 'เมื่อสักครู่';
+  if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+
+  return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+}
 
 export function ProjectSidebar({
   projects,
@@ -65,17 +86,17 @@ export function ProjectSidebar({
   };
 
   return (
-    <div className="w-80 bg-white border-r flex flex-col h-screen">
+    <div className="w-80 bg-card border-r flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">
+      <div className="p-4 border-b bg-background/50">
+        <h2 className="text-lg font-bold mb-3">
           {t('chat.projects')}
         </h2>
 
         {/* New Project Button */}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full" size="sm">
+            <Button className="w-full shadow-sm hover:shadow" size="sm">
               <Plus className="mr-2 h-4 w-4" />
               {t('chat.newProject')}
             </Button>
@@ -158,15 +179,15 @@ export function ProjectSidebar({
       </div>
 
       {/* Projects List */}
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto p-3">
         {projects.length === 0 ? (
-          <div className="text-center text-gray-400 text-sm mt-8">
-            <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-30" />
-            <p>ยังไม่มีโปรเจกต์</p>
-            <p className="text-xs mt-1">สร้างโปรเจกต์เพื่อเริ่มแชท</p>
+          <div className="text-center text-muted-foreground text-sm mt-8 px-4">
+            <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <p className="font-medium mb-1">ยังไม่มีโปรเจกต์</p>
+            <p className="text-xs">สร้างโปรเจกต์เพื่อเริ่มแชท</p>
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {projects.map((project) => {
               const Icon = PROMPT_ICONS[project.system_prompt_type];
               const isSelected = selectedProject?.id === project.id;
@@ -175,32 +196,55 @@ export function ProjectSidebar({
                 <button
                   key={project.id}
                   onClick={() => onProjectSelect(project)}
-                  className={`w-full text-left p-3 rounded-lg transition-all ${
+                  className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${
                     isSelected
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'hover:bg-gray-50 border border-transparent'
+                      ? 'bg-primary/10 border-2 border-primary shadow-sm'
+                      : 'hover:bg-accent border-2 border-transparent'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <Icon
-                      className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
-                        isSelected ? 'text-blue-600' : 'text-gray-400'
-                      }`}
-                    />
+                    {/* Avatar */}
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarFallback
+                        className={`font-semibold text-sm ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground group-hover:bg-primary/20'
+                        }`}
+                      >
+                        {project.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+
                     <div className="flex-1 min-w-0">
+                      {/* Project Name */}
                       <div
-                        className={`font-medium text-sm mb-1 truncate ${
-                          isSelected ? 'text-blue-900' : 'text-gray-900'
+                        className={`font-semibold text-sm mb-1 truncate ${
+                          isSelected ? 'text-primary' : 'text-foreground'
                         }`}
                       >
                         {project.name}
                       </div>
+
+                      {/* System Prompt Badge */}
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Badge
+                          variant={isSelected ? 'default' : 'secondary'}
+                          className="text-xs font-medium"
+                        >
+                          <Icon className="h-3 w-3 mr-1" />
+                          {t(`chat.systemPrompt.${project.system_prompt_type}`)}
+                        </Badge>
+                      </div>
+
+                      {/* Last Updated */}
                       <div
-                        className={`text-xs ${
-                          isSelected ? 'text-blue-600' : 'text-gray-500'
+                        className={`flex items-center gap-1 text-xs ${
+                          isSelected ? 'text-primary/70' : 'text-muted-foreground'
                         }`}
                       >
-                        {t(`chat.systemPrompt.${project.system_prompt_type}`)}
+                        <Clock className="h-3 w-3" />
+                        <span>{getRelativeTime(project.updated_at)}</span>
                       </div>
                     </div>
                   </div>
