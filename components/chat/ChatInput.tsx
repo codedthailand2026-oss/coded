@@ -16,11 +16,12 @@ import { useState, useRef, KeyboardEvent } from 'react';
 import { Send, Paperclip, Image as ImageIcon } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
+import type { Attachment } from '@/types/chat';
 
 interface ChatInputProps {
   onSend: (
     message: string,
-    attachments?: { type: 'file' | 'image'; url: string; name: string }[]
+    attachments?: Attachment[]
   ) => Promise<any>;
   disabled?: boolean;
   placeholder?: string;
@@ -29,9 +30,7 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
   const { t } = useTranslation();
   const [message, setMessage] = useState('');
-  const [attachments, setAttachments] = useState<
-    { type: 'file' | 'image'; url: string; name: string }[]
-  >([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea

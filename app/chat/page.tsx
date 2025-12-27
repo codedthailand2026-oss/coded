@@ -22,7 +22,7 @@ import { MessageList } from '@/components/chat/MessageList';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { SystemPromptSelector } from '@/components/chat/SystemPromptSelector';
 import { useTranslation } from '@/lib/i18n/context';
-import type { Project, Conversation, Message, SystemPromptType } from '@/types/chat';
+import type { Project, Conversation, Message, SystemPromptType, Attachment } from '@/types/chat';
 
 export default function ChatPage() {
   const { t } = useTranslation();
@@ -128,7 +128,7 @@ export default function ChatPage() {
 
   async function sendMessage(
     message: string,
-    attachments?: { type: 'file' | 'image'; url: string; name: string }[]
+    attachments?: Attachment[]
   ) {
     setSending(true);
 
@@ -172,7 +172,7 @@ export default function ChatPage() {
           setSelectedConversation({
             id: data.data.conversation_id,
             user_id: '',
-            project_id: selectedProject?.id || null,
+            project_id: selectedProject?.id,
             title: message.substring(0, 50),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),

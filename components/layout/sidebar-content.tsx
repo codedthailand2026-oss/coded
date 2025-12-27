@@ -86,7 +86,6 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const supabase = createClient();
   const { t } = useTranslation();
 
   // User data state
@@ -116,8 +115,14 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
    * 3. Update state
    */
   useEffect(() => {
+    // Only run on client side after component mounts
+    if (!mounted) return;
+
     async function loadUserData() {
       try {
+        // Create client only on client-side
+        const supabase = createClient();
+
         // 1. Get authenticated user
         const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
 
@@ -170,7 +175,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
     }
 
     loadUserData();
-  }, [supabase, router]);
+  }, [mounted, router]);
 
   /**
    * Handle Logout
@@ -181,6 +186,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
    */
   const handleLogout = async () => {
     try {
+      const supabase = createClient();
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Logout error:', error);

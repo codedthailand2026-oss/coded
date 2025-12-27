@@ -58,7 +58,7 @@ export default function OnboardingPage() {
     {
       component: PhoneStep,
       title: 'Your Phone Number',
-      description: 'We'll use this to contact you if needed',
+      description: "We'll use this to contact you if needed",
     },
     {
       component: CompanyStep,
