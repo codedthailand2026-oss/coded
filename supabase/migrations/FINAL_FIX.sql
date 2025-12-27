@@ -1,10 +1,18 @@
 -- ===================================================================
--- FINAL FIX: ลบของเก่าทิ้งหมด แล้วสร้างใหม่
+-- FINAL FIX: ลบของเก่าทิ้งหมด แล้วสร้างใหม่ (SCHEMA ถูกต้อง)
 -- ===================================================================
 -- แก้ปัญหา: invalid input syntax for type uuid: "free"
--- สาเหตุ: มี trigger/function เก่าค้างอยู่ที่ใช้ WHERE id = 'free' ผิด
+-- สาเหตุ: Schema ผิด! plan_id เป็น TEXT ไม่ใช่ UUID
 --
--- Solution: ลบทิ้งหมด สร้างใหม่ทั้งหมด
+-- Plans table schema:
+-- - id: text (PK) -- 'free', 'starter', 'pro', 'enterprise'
+-- - name: text
+-- - price_monthly: integer
+-- - price_yearly: integer
+-- - chat_credits_monthly: integer
+-- - image_credits_monthly: integer
+-- - features: jsonb
+-- - is_active: boolean
 -- ===================================================================
 
 -- ===================================================================
@@ -25,36 +33,16 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_free_plan_id uuid;
-  v_plan_count integer;
+  v_free_plan_exists boolean;
 BEGIN
-  -- Debug: เช็คว่ามี plan กี่ตัว
-  SELECT COUNT(*) INTO v_plan_count FROM public.plans;
+  -- เช็คว่ามี Free plan หรือไม่ (id = 'free')
+  SELECT EXISTS (
+    SELECT 1 FROM public.plans WHERE id = 'free' AND is_active = true
+  ) INTO v_free_plan_exists;
 
-  -- หา Free plan โดยใช้ name column (ไม่ใช่ id!)
-  SELECT id INTO v_free_plan_id
-  FROM public.plans
-  WHERE LOWER(TRIM(name)) = 'free'
-  LIMIT 1;
-
-  -- ถ้าไม่มี Free plan ให้สร้าง
-  IF v_free_plan_id IS NULL THEN
-    INSERT INTO public.plans (
-      name,
-      price,
-      chat_credits,
-      image_credits,
-      features,
-      is_popular
-    ) VALUES (
-      'Free',
-      0,
-      50,
-      3,
-      ARRAY['50 Chat credits', '3 Image credits', 'Basic support']::text[],
-      false
-    )
-    RETURNING id INTO v_free_plan_id;
+  -- ถ้าไม่มี Free plan ให้ error (admin ต้องสร้างก่อน)
+  IF NOT v_free_plan_exists THEN
+    RAISE EXCEPTION 'Free plan not found. Please create plans first.';
   END IF;
 
   -- สร้าง profile
@@ -78,10 +66,10 @@ BEGIN
     NOW()
   );
 
-  -- สร้าง subscription
+  -- สร้าง subscription (Free plan)
   INSERT INTO public.subscriptions (
     user_id,
-    plan_id,
+    plan_id,          -- TEXT: 'free'
     status,
     current_period_start,
     current_period_end,
@@ -89,7 +77,7 @@ BEGIN
     updated_at
   ) VALUES (
     NEW.id,
-    v_free_plan_id,
+    'free',           -- ใช้ 'free' ตรงๆ (เป็น text ไม่ใช่ uuid)
     'active',
     NOW(),
     NOW() + INTERVAL '1 year',
@@ -98,6 +86,7 @@ BEGIN
   );
 
   -- สร้าง credits
+  -- ดึงค่า credits จาก Free plan
   INSERT INTO public.credits (
     user_id,
     chat_credits,
@@ -107,16 +96,18 @@ BEGIN
     credits_reset_at,
     created_at,
     updated_at
-  ) VALUES (
+  )
+  SELECT
     NEW.id,
-    50,
-    3,
+    p.chat_credits_monthly,
+    p.image_credits_monthly,
     0,
     0,
     DATE_TRUNC('month', NOW()) + INTERVAL '1 month',
     NOW(),
     NOW()
-  );
+  FROM public.plans p
+  WHERE p.id = 'free';
 
   RETURN NEW;
 END;
@@ -138,7 +129,9 @@ CREATE TRIGGER on_auth_user_created
 DO $$
 DECLARE
   v_user_record RECORD;
-  v_free_plan_id uuid;
+  v_free_plan_exists boolean;
+  v_chat_credits integer;
+  v_image_credits integer;
   v_users_processed integer := 0;
   v_users_total integer := 0;
 BEGIN
@@ -159,29 +152,34 @@ BEGIN
   RAISE NOTICE '========================================';
   RAISE NOTICE '';
 
-  -- หา Free plan (ใช้ name ไม่ใช่ id!)
-  SELECT id INTO v_free_plan_id
-  FROM public.plans
-  WHERE LOWER(TRIM(name)) = 'free'
-  LIMIT 1;
+  -- เช็คว่ามี Free plan หรือไม่
+  SELECT EXISTS (
+    SELECT 1 FROM public.plans WHERE id = 'free' AND is_active = true
+  ) INTO v_free_plan_exists;
 
-  IF v_free_plan_id IS NULL THEN
-    RAISE NOTICE '⚠️  Free plan not found, creating now...';
-
-    INSERT INTO public.plans (
-      name, price, chat_credits, image_credits, features, is_popular
-    ) VALUES (
-      'Free', 0, 50, 3,
-      ARRAY['50 Chat credits', '3 Image credits', 'Basic support']::text[],
-      false
-    )
-    RETURNING id INTO v_free_plan_id;
-
-    RAISE NOTICE '✅ Created Free plan: %', v_free_plan_id;
-  ELSE
-    RAISE NOTICE '✅ Found Free plan: %', v_free_plan_id;
+  IF NOT v_free_plan_exists THEN
+    RAISE NOTICE '❌ Free plan not found!';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Please create Free plan first:';
+    RAISE NOTICE 'INSERT INTO public.plans (id, name, price_monthly, price_yearly,';
+    RAISE NOTICE '  chat_credits_monthly, image_credits_monthly, features, is_active, sort_order)';
+    RAISE NOTICE 'VALUES (''free'', ''Free'', 0, 0, 50, 3,';
+    RAISE NOTICE '  ''{"features": ["50 Chat credits/month", "3 Image credits/month", "Basic support"]}''::jsonb,';
+    RAISE NOTICE '  true, 1);';
+    RAISE NOTICE '';
+    RAISE NOTICE '========================================';
+    RETURN;
   END IF;
 
+  -- ดึงค่า credits จาก Free plan
+  SELECT chat_credits_monthly, image_credits_monthly
+  INTO v_chat_credits, v_image_credits
+  FROM public.plans
+  WHERE id = 'free';
+
+  RAISE NOTICE '✅ Found Free plan';
+  RAISE NOTICE '   - Chat credits: %', v_chat_credits;
+  RAISE NOTICE '   - Image credits: %', v_image_credits;
   RAISE NOTICE '';
 
   -- นับ users ที่ยังไม่มี profile
@@ -235,14 +233,14 @@ BEGIN
         NOW()
       );
 
-      -- Subscription
+      -- Subscription (plan_id = 'free' เป็น TEXT)
       INSERT INTO public.subscriptions (
         user_id, plan_id, status,
         current_period_start, current_period_end,
         created_at, updated_at
       ) VALUES (
         v_user_record.id,
-        v_free_plan_id,
+        'free',  -- TEXT ไม่ใช่ UUID
         'active',
         NOW(),
         NOW() + INTERVAL '1 year',
@@ -256,7 +254,10 @@ BEGIN
         bonus_chat_credits, bonus_image_credits,
         credits_reset_at, created_at, updated_at
       ) VALUES (
-        v_user_record.id, 50, 3, 0, 0,
+        v_user_record.id,
+        v_chat_credits,
+        v_image_credits,
+        0, 0,
         DATE_TRUNC('month', NOW()) + INTERVAL '1 month',
         NOW(),
         NOW()

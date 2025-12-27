@@ -30,9 +30,11 @@ SELECT
   id,
   name,
   LOWER(name) as name_lower,
-  price,
-  chat_credits,
-  image_credits
+  price_monthly,
+  price_yearly,
+  chat_credits_monthly,
+  image_credits_monthly,
+  is_active
 FROM public.plans
 ORDER BY name;
 
