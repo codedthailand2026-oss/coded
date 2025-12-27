@@ -76,6 +76,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
+    // ถ้ามี user แล้ว ให้เช็คว่ามี profile หรือไม่
+    // (ป้องกัน case ที่ user ถูกลบออกจาก DB หรือ trigger ไม่ทำงาน)
+    if (user && path !== "/setup-profile" && path !== "/api/setup-profile") {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+
+      // ถ้าไม่มี profile หรือ query error (เช่น RLS block)
+      if (!profile || error) {
+        // Redirect ไปหน้าสร้าง profile อัตโนมัติ
+        return NextResponse.redirect(new URL("/setup-profile", request.url));
+      }
+    }
+
     // ถ้า login แล้วแต่พยายามเข้าหน้า login/register
     if (authRoutes.some((route) => path.startsWith(route)) && user) {
       return NextResponse.redirect(new URL("/", request.url));
