@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { OnboardingData } from '@/types/onboarding';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // Steps
 import PhoneStep from '@/components/onboarding/PhoneStep';
@@ -146,25 +147,34 @@ export default function OnboardingPage() {
 
         {/* Step Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              {steps[currentStep].title}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {steps[currentStep].description}
-            </p>
-          </div>
-
-          <CurrentStepComponent
-            data={data}
-            onNext={handleNext}
-            onBack={currentStep > 0 ? handleBack : undefined}
-          />
-
-          {isSubmitting && (
-            <div className="mt-6 text-center text-gray-600 dark:text-gray-400">
-              Saving your information...
+          {isSubmitting ? (
+            // Loading state with spinner
+            <div className="flex flex-col items-center justify-center py-16">
+              <LoadingSpinner size="lg" className="text-blue-600 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                กำลังบันทึกข้อมูล...
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                รอสักครู่ เราเกือบเสร็จแล้ว
+              </p>
             </div>
+          ) : (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {steps[currentStep].title}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {steps[currentStep].description}
+                </p>
+              </div>
+
+              <CurrentStepComponent
+                data={data}
+                onNext={handleNext}
+                onBack={currentStep > 0 ? handleBack : undefined}
+              />
+            </>
           )}
         </div>
 

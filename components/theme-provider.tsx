@@ -1,7 +1,7 @@
 /**
  * Theme Provider
  *
- * จัดการ theme ของ application (dark, blue, purple, green)
+ * จัดการ theme ของ application (dark, light)
  *
  * Features:
  * - เก็บ theme preference ใน localStorage
@@ -9,17 +9,15 @@
  * - Provide theme context สำหรับ components อื่น
  *
  * Themes:
- * - dark (default) - สีดำ เหมาะกับการทำงานนาน ลดแสงจอ
- * - blue - สีน้ำเงิน professional สำหรับ corporate
- * - purple - สีม่วง creative สำหรับ content creator
- * - green - สีเขียว calm สำหรับงาน focus
+ * - dark (default) - สีดำ พื้นฐานของ app
+ * - light - สีขาว สำหรับคนที่ชอบสว่าง
  */
 
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "blue" | "purple" | "green";
+type Theme = "dark" | "light";
 
 interface ThemeContextType {
   theme: Theme;
@@ -29,7 +27,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // เริ่มต้นด้วย dark theme
+  // เริ่มต้นด้วย dark theme (default)
   const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
@@ -37,7 +35,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem("coded-theme") as Theme;
-    if (savedTheme && ["dark", "blue", "purple", "green"].includes(savedTheme)) {
+    if (savedTheme && ["dark", "light"].includes(savedTheme)) {
       setTheme(savedTheme);
     }
   }, []);
@@ -49,14 +47,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
 
     // ลบ theme classes เก่าทั้งหมด
-    root.classList.remove("dark", "theme-blue", "theme-purple", "theme-green");
+    root.classList.remove("dark", "light");
 
     // เพิ่ม theme class ใหม่
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.add("dark", `theme-${theme}`);
-    }
+    root.classList.add(theme);
 
     // บันทึกลง localStorage
     localStorage.setItem("coded-theme", theme);

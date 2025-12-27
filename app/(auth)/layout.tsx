@@ -44,7 +44,7 @@ export default function AuthLayout({
           {/* Theme Switcher */}
           {mounted && (
             <div className="flex items-center gap-2">
-              <ThemeSwitcher compact />
+              <ThemeSwitcher />
             </div>
           )}
         </div>

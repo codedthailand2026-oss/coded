@@ -286,7 +286,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
               <Palette className="h-4 w-4" />
               <span>Theme</span>
             </div>
-            <ThemeSwitcher compact />
+            <ThemeSwitcher />
           </div>
         )}
       </ScrollArea>
