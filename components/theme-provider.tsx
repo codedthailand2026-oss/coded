@@ -64,11 +64,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme, mounted]);
 
-  // ป้องกัน hydration mismatch
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide context, even before mounted
+  // This prevents "useTheme must be used within ThemeProvider" error
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
