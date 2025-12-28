@@ -111,15 +111,15 @@ export function AppSidebar({
   return (
     <div
       className={cn(
-        'bg-card border-r flex flex-col transition-all duration-300',
-        collapsed ? 'w-20' : 'w-64'
+        'bg-card/95 backdrop-blur-sm border-r border-border/50 flex flex-col transition-all duration-300',
+        collapsed ? 'w-16' : 'w-56'
       )}
     >
       {/* Header */}
-      <div className="h-16 border-b flex items-center justify-between px-4">
+      <div className="h-14 border-b border-border/50 flex items-center justify-between px-3">
         {!collapsed && (
-          <div className="flex items-center gap-2 font-semibold">
-            <div className="w-8 h-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center text-sm">
+          <div className="flex items-center gap-2 font-bold text-sm">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white flex items-center justify-center text-xs">
               AI
             </div>
             <span>Coded</span>
@@ -129,18 +129,18 @@ export function AppSidebar({
           variant="ghost"
           size="icon"
           onClick={onToggleCollapse}
-          className="ml-auto"
+          className="ml-auto h-7 w-7"
         >
           {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
           )}
         </Button>
       </div>
 
       {/* Features */}
-      <div className="flex-1 p-4 space-y-2">
+      <div className="flex-1 p-2 space-y-1">
         {features.map((feature) => {
           const Icon = feature.icon;
           const isActive = activeFeature === feature.id;
@@ -150,59 +150,59 @@ export function AppSidebar({
               key={feature.id}
               onClick={() => onFeatureChange(feature.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
-                'font-medium text-sm',
+                'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200',
+                'text-sm font-medium',
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
               )}
               title={!collapsed ? undefined : t(feature.labelKey)}
             >
-              <Icon className="h-5 w-5 flex-shrink-0" />
-              {!collapsed && <span>{t(feature.labelKey)}</span>}
+              <Icon className="h-4 w-4 flex-shrink-0" />
+              {!collapsed && <span className="text-xs">{t(feature.labelKey)}</span>}
             </button>
           );
         })}
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t p-4 space-y-4">
+      <div className="border-t border-border/50 p-2 space-y-2">
         {/* Credits */}
         {!collapsed && (
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-4 border border-primary/20">
-            <div className="flex items-center gap-2 text-xs font-medium text-primary mb-2">
-              <Coins className="h-4 w-4" />
-              <span>{t('credits.graphic')}</span>
+          <div className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-lg p-3 border border-primary/10">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-primary mb-1.5">
+              <Coins className="h-3 w-3" />
+              <span>Credits</span>
             </div>
-            <div className="text-3xl font-bold mb-3">{user.graphicCredits}</div>
+            <div className="text-2xl font-bold mb-2">{user.graphicCredits}</div>
             <Button
               size="sm"
-              className="w-full text-xs font-medium shadow-sm hover:shadow"
+              className="w-full h-7 text-xs font-medium"
             >
-              อัพเกรด
+              Upgrade
             </Button>
           </div>
         )}
 
         {/* Theme + Language */}
         {!collapsed && mounted && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1 bg-muted/30 rounded-md p-0.5">
               <Button
                 variant={theme === 'dark' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setTheme('dark')}
-                className="flex-1 h-8"
+                className="flex-1 h-6 text-xs"
               >
-                <Moon className="h-3.5 w-3.5" />
+                <Moon className="h-3 w-3" />
               </Button>
               <Button
                 variant={theme === 'light' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setTheme('light')}
-                className="flex-1 h-8"
+                className="flex-1 h-6 text-xs"
               >
-                <Sun className="h-3.5 w-3.5" />
+                <Sun className="h-3 w-3" />
               </Button>
             </div>
             <LanguageSwitcher />
@@ -212,21 +212,21 @@ export function AppSidebar({
         {/* User Profile */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent transition-all duration-200"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent/50 transition-all duration-200"
         >
-          <Avatar className="h-9 w-9 ring-2 ring-border">
+          <Avatar className="h-7 w-7 ring-1 ring-border">
             <AvatarImage src={user.avatar} />
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-primary font-semibold text-xs">
               {user.name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <>
               <div className="flex-1 text-left">
-                <div className="text-sm font-semibold">{user.name}</div>
+                <div className="text-xs font-semibold">{user.name}</div>
                 <div className="text-xs text-muted-foreground truncate">{user.email}</div>
               </div>
-              <LogOut className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              <LogOut className="h-3 w-3 text-muted-foreground" />
             </>
           )}
         </button>
