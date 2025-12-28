@@ -24,10 +24,9 @@ import {
 } from '@/components/ui/select';
 
 interface GraphicGeneratorProps {
-  type?: 'image' | 'video' | 'audio'; // Optional, can be changed via tabs
+  type: 'image' | 'video' | 'audio';
 }
 
-type FeatureType = 'image' | 'video' | 'audio';
 type ReferenceTab = 'style' | 'character' | 'upload';
 
 interface UploadedImage {
@@ -87,10 +86,9 @@ const STYLES = [
   { id: 'minimal', name: 'Minimal', icon: Sparkles },
 ];
 
-export function GraphicGenerator({ type: initialType = 'image' }: GraphicGeneratorProps) {
+export function GraphicGenerator({ type }: GraphicGeneratorProps) {
   const { t } = useTranslation();
 
-  const [activeType, setActiveType] = useState<FeatureType>(initialType);
   const [model, setModel] = useState('auto');
   const [prompt, setPrompt] = useState('');
   const [activeTab, setActiveTab] = useState<ReferenceTab>('style');
@@ -145,50 +143,27 @@ export function GraphicGenerator({ type: initialType = 'image' }: GraphicGenerat
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header with Tabs */}
-      <div className="border-b bg-card">
-        <div className="flex items-center justify-between px-6 py-3">
-          {/* Type Tabs */}
-          <div className="flex gap-1">
-            <button
-              onClick={() => setActiveType('image')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                activeType === 'image'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Image
-            </button>
-            <button
-              onClick={() => setActiveType('video')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                activeType === 'video'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Video
-            </button>
-            <button
-              onClick={() => setActiveType('audio')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                activeType === 'audio'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Audio
-            </button>
-          </div>
+      {/* Header */}
+      <div className="border-b bg-card px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">
+            {type === 'image' && 'รูปภาพ สร้างการฟิก'}
+            {type === 'video' && 'วีดีโอ สร้างการฟิก'}
+            {type === 'audio' && 'เสียง สร้างการฟิก'}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {type === 'image' && 'สร้างภาพด้วย AI คุณภาพสูง'}
+            {type === 'video' && 'แปลงรูปเป็นวิดีโอสำหรับ Reels'}
+            {type === 'audio' && 'สร้างเสียงพูด Text-to-Speech'}
+          </p>
+        </div>
 
-          {/* Credits */}
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground">เครดิตการฟิก</div>
-            <div className="text-xl font-bold text-primary">
-              {graphicCredits}{' '}
-              <span className="text-xs font-normal text-muted-foreground">คงเหลือ</span>
-            </div>
+        {/* Credits */}
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground">เครดิตการฟิก</div>
+          <div className="text-xl font-bold text-primary">
+            {graphicCredits}{' '}
+            <span className="text-xs font-normal text-muted-foreground">คงเหลือ</span>
           </div>
         </div>
       </div>
