@@ -142,16 +142,16 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="border-b bg-card px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-border/50 bg-card/95 backdrop-blur-sm px-5 py-2.5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">
+          <h1 className="text-base font-bold">
             {type === 'image' && 'รูปภาพ สร้างการฟิก'}
             {type === 'video' && 'วีดีโอ สร้างการฟิก'}
             {type === 'audio' && 'เสียง สร้างการฟิก'}
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             {type === 'image' && 'สร้างภาพด้วย AI คุณภาพสูง'}
             {type === 'video' && 'แปลงรูปเป็นวิดีโอสำหรับ Reels'}
             {type === 'audio' && 'สร้างเสียงพูด Text-to-Speech'}
@@ -159,11 +159,11 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
         </div>
 
         {/* Credits */}
-        <div className="text-right">
-          <div className="text-xs text-muted-foreground">เครดิตการฟิก</div>
-          <div className="text-xl font-bold text-primary">
+        <div className="px-3 py-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-primary/10">
+          <div className="text-xs text-muted-foreground">Credits</div>
+          <div className="text-base font-bold text-primary">
             {graphicCredits}{' '}
-            <span className="text-xs font-normal text-muted-foreground">คงเหลือ</span>
+            <span className="text-xs font-normal text-muted-foreground">left</span>
           </div>
         </div>
       </div>
@@ -171,49 +171,49 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden flex">
         {/* Left Sidebar */}
-        <div className="w-80 border-r overflow-y-auto p-4 space-y-4 bg-card">
+        <div className="w-64 border-r border-border/50 overflow-y-auto p-3 space-y-3 bg-card/80 backdrop-blur-sm">
           {/* Model Selection */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               MODEL
             </label>
             <Select value={model} onValueChange={setModel}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="auto">
                   <div className="flex items-center gap-2">
-                    <Wand2 className="h-3.5 w-3.5" />
-                    <span>Auto</span>
+                    <Wand2 className="h-3 w-3" />
+                    <span className="text-xs">Auto</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="flux-pro">Flux Pro</SelectItem>
-                <SelectItem value="flux-realism">Flux Realism</SelectItem>
-                <SelectItem value="stable-diffusion">Stable Diffusion XL</SelectItem>
+                <SelectItem value="flux-pro" className="text-xs">Flux Pro</SelectItem>
+                <SelectItem value="flux-realism" className="text-xs">Flux Realism</SelectItem>
+                <SelectItem value="stable-diffusion" className="text-xs">Stable Diffusion XL</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
               ระบบจะเลือก model ที่เหมาะสมที่สุดอัตโนมัติ
             </p>
           </div>
 
           {/* References */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 REFERENCES
               </label>
               <button className="text-xs text-primary hover:underline">+ Add</button>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-3">
+            <div className="flex gap-1">
               <button
                 onClick={() => setActiveTab('style')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded text-xs font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium transition-all ${
                   activeTab === 'style'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm'
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                 }`}
               >
@@ -222,9 +222,9 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
               </button>
               <button
                 onClick={() => setActiveTab('character')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded text-xs font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium transition-all ${
                   activeTab === 'character'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm'
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                 }`}
               >
@@ -233,9 +233,9 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
               </button>
               <button
                 onClick={() => setActiveTab('upload')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded text-xs font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium transition-all ${
                   activeTab === 'upload'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm'
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                 }`}
               >
@@ -257,13 +257,13 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
                         onClick={() =>
                           setSelectedStyle(selectedStyle === style.id ? null : style.id)
                         }
-                        className={`p-3 rounded-lg border transition-all ${
+                        className={`p-2.5 rounded-lg border transition-all ${
                           selectedStyle === style.id
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/50'
+                            ? 'border-primary/20 bg-gradient-to-br from-blue-500/10 to-purple-500/10'
+                            : 'border-border hover:border-primary/30 hover:bg-accent/50'
                         }`}
                       >
-                        <Icon className={`h-5 w-5 mx-auto mb-1.5 ${selectedStyle === style.id ? 'text-primary' : 'text-muted-foreground'}`} />
+                        <Icon className={`h-4 w-4 mx-auto mb-1 ${selectedStyle === style.id ? 'text-primary' : 'text-muted-foreground'}`} />
                         <div className="text-xs font-medium">{style.name}</div>
                       </button>
                     );
@@ -273,13 +273,13 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
 
               {/* Character Tab */}
               {activeTab === 'character' && (
-                <div className="text-center py-6 border-2 border-dashed rounded-lg">
-                  <User className="h-10 w-10 mx-auto mb-2 text-muted-foreground opacity-50" />
-                  <p className="text-xs text-muted-foreground mb-3">
+                <div className="text-center py-4 border-2 border-dashed rounded-lg bg-muted/20">
+                  <User className="h-8 w-8 mx-auto mb-1.5 text-muted-foreground opacity-50" />
+                  <p className="text-xs text-muted-foreground mb-2">
                     อัปโหลดรูปตัวละครที่ต้องการใช้
                   </p>
                   <label htmlFor="character-upload">
-                    <Button size="sm" variant="outline" asChild>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
                       <span className="cursor-pointer">เลือกรูป</span>
                     </Button>
                   </label>
@@ -297,13 +297,13 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
               {/* Upload Tab */}
               {activeTab === 'upload' && (
                 <div>
-                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-xs font-medium mb-1">อัปโหลดรูปอ้างอิง</p>
+                  <div className="border-2 border-dashed rounded-lg p-3 text-center bg-muted/20">
+                    <Upload className="h-7 w-7 mx-auto mb-1.5 text-muted-foreground" />
+                    <p className="text-xs font-medium mb-0.5">อัปโหลดรูปอ้างอิง</p>
                     <p className="text-xs text-muted-foreground mb-2">PNG, JPG max 10MB</p>
                     <label htmlFor="image-upload">
-                      <Button size="sm" variant="outline" asChild>
-                        <span className="cursor-pointer text-xs">เลือกรูป</span>
+                      <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+                        <span className="cursor-pointer">เลือกรูป</span>
                       </Button>
                     </label>
                     <input
@@ -324,13 +324,13 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
                           <img
                             src={img.url}
                             alt={img.name}
-                            className="w-full h-16 object-cover rounded border"
+                            className="w-full h-14 object-cover rounded border"
                           />
                           <button
                             onClick={() => removeImage(img.id)}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-2.5 w-2.5" />
                           </button>
                         </div>
                       ))}
@@ -342,18 +342,18 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
           </div>
 
           {/* Prompt */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               PROMPT
             </label>
             <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Realistic, professional photo of the main object placed naturally on a marble countertop with towels. The object must appear true to scale and remain the main focal point, captured with sharp detail and high clarity. The background should look natural but slightly blurred. Ensure natural lighting, realistic shadows, and a clean, polished advertising style."
-              rows={6}
+              rows={5}
               className="resize-none text-xs"
             />
-            <div className="flex items-center justify-between mt-1.5">
+            <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 ยิ่งบอกรายละเอียดมาก ยิ่งได้ผลลัพธ์ที่ดี
               </p>
@@ -365,7 +365,7 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
           <Button
             onClick={handleGenerate}
             disabled={!prompt.trim() || generating || graphicCredits < 1}
-            className="w-full h-11 font-semibold"
+            className="w-full h-10 font-semibold bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 hover:from-blue-600 hover:via-purple-700 hover:to-pink-700 text-white shadow-md"
             size="lg"
           >
             {generating ? (
@@ -383,29 +383,29 @@ export function GraphicGenerator({ type }: GraphicGeneratorProps) {
         </div>
 
         {/* Right Content - Templates */}
-        <div className="flex-1 overflow-y-auto p-6 bg-background">
-          <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex-1 overflow-y-auto p-5 bg-background/50">
+          <div className="max-w-7xl mx-auto space-y-6">
             {TEMPLATE_CATEGORIES.map((category) => (
               <div key={category.name}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold">{category.name}</h3>
-                  <button className="text-sm text-primary hover:underline">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-bold">{category.name}</h3>
+                  <button className="text-xs text-primary hover:underline">
                     See all →
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                   {category.templates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => handleTemplateClick(template)}
-                      className="group text-left bg-card rounded-lg border overflow-hidden hover:border-primary transition-all hover:shadow-md"
+                      className="group text-left bg-card/80 backdrop-blur-sm rounded-lg border border-border/50 overflow-hidden hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all"
                     >
-                      <div className="aspect-video bg-muted flex items-center justify-center">
-                        <ImageIcon className="h-12 w-12 text-muted-foreground/20" />
+                      <div className="aspect-video bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center">
+                        <ImageIcon className="h-10 w-10 text-muted-foreground/20 group-hover:text-primary/30 transition-colors" />
                       </div>
-                      <div className="p-3">
-                        <p className="text-sm font-medium line-clamp-2 group-hover:text-primary transition-colors">
+                      <div className="p-2.5">
+                        <p className="text-xs font-medium line-clamp-2 group-hover:text-primary transition-colors">
                           {template.title}
                         </p>
                       </div>

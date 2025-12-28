@@ -37,19 +37,25 @@ export function AppPageClient() {
   };
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <AppSidebar
-        activeFeature={activeFeature}
-        onFeatureChange={setActiveFeature}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+    <div className="flex h-screen overflow-hidden relative">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20" />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
-        {renderFeature()}
-      </main>
+      {/* Content */}
+      <div className="relative flex w-full h-full">
+        {/* Sidebar */}
+        <AppSidebar
+          activeFeature={activeFeature}
+          onFeatureChange={setActiveFeature}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-hidden">
+          {renderFeature()}
+        </main>
+      </div>
     </div>
   );
 }
