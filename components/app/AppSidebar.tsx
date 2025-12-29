@@ -17,6 +17,7 @@ import {
   Image as ImageIcon,
   Video,
   Mic,
+  BarChart3,
   Settings,
   LogOut,
   ChevronLeft,
@@ -46,6 +47,7 @@ const features = [
   { id: 'image' as FeatureTab, icon: ImageIcon, labelKey: 'nav.image' },
   { id: 'video' as FeatureTab, icon: Video, labelKey: 'nav.video' },
   { id: 'audio' as FeatureTab, icon: Mic, labelKey: 'nav.audio' },
+  { id: 'analytics' as FeatureTab, icon: BarChart3, labelKey: 'nav.analytics' },
 ];
 
 export function AppSidebar({

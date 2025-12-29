@@ -13,8 +13,9 @@ import { ChatFeature } from '@/components/features/ChatFeature';
 import { ImageFeature } from '@/components/features/ImageFeature';
 import { VideoFeature } from '@/components/features/VideoFeature';
 import { AudioFeature } from '@/components/features/AudioFeature';
+import { AnalyticsFeature } from '@/components/features/AnalyticsFeature';
 
-export type FeatureTab = 'chat' | 'image' | 'video' | 'audio';
+export type FeatureTab = 'chat' | 'image' | 'video' | 'audio' | 'analytics';
 
 export function AppPageClient() {
   const [activeFeature, setActiveFeature] = useState<FeatureTab>('chat');
@@ -31,6 +32,8 @@ export function AppPageClient() {
         return <VideoFeature />;
       case 'audio':
         return <AudioFeature />;
+      case 'analytics':
+        return <AnalyticsFeature />;
       default:
         return <ChatFeature />;
     }
